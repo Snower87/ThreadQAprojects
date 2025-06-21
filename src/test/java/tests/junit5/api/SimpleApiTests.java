@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
 public class SimpleApiTests {
@@ -93,6 +94,33 @@ public class SimpleApiTests {
         //Actual   :[20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
         Assertions.assertNotEquals(sortedResponseIds, notSortedIds);
         Assertions.assertEquals(sortedByCode, sortedResponseIds);
+    }
+
+    public static boolean doesNotHaveDuplicates(List<Integer> list) {
+        return list.stream().distinct().count() == list.size();
+    }
+
+    @Test
+    public void testUniqueZipCode() {
+        String sortType = "asc";
+        Response zipCodeResponse = given()
+                .queryParam("sort", sortType)
+                .get(base_url)
+                .then()
+                .log().all()
+                .extract().response();
+
+        List<String> zipCodeList = zipCodeResponse.jsonPath().getList("users.address.zipcode");
+        //zipCodeList.add("75070"); // ---> отрицательный тест
+
+        List<Integer> integerListZipCode = zipCodeList
+                            .stream()
+                            .map(Integer::valueOf)
+                            .toList();
+
+        System.out.println("zipCodeList: " + zipCodeList);
+        //75070, 87835, 30806, 19699, 71670, 64908, 16482, 71355, 47177, 09316, 80044, 45275, 98096, 16642, 73260, 28227, 37670, 01691, 15230, 30914
+        Assertions.assertTrue(doesNotHaveDuplicates(integerListZipCode));
     }
 
     @Test
