@@ -1,14 +1,19 @@
 package tests.junit5.api;
 
+import io.restassured.http.ContentType;
 import io.restassured.response.Response;
+import models.fakeapiusers.Address;
+import models.fakeapiusers.Geolocation;
+import models.fakeapiusers.Name;
+import models.fakeapiusers.POJORequestAddUser;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import lombok.*;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -134,4 +139,41 @@ public class SimpleApiTests {
                 .timeIn(TimeUnit.MILLISECONDS);
         System.out.println("Time responce: " + time + " ms");
     }
+
+    @Test
+    public void addNewUserTest() {
+        // 1 вариант создания - конструктор
+        Name name = new Name("Thomas", "Anderson");
+        // 2 вариант создания - сеттеры
+        //name.setFirstname("Thomas");
+        //name.setLastname("Anderson");
+        // 3 вариант создания - через builder
+        //Name.builder().firstname("Thomas").lastname("Anderson").build();
+        Geolocation geolocation = new Geolocation(70.123, 100.1);
+
+        Address address = Address.builder()
+                .city("Москва")
+                .street("Noviy Arbat 12")
+                .number("14")
+                .zipcode("54231-4231")
+                .geolocation(geolocation)
+                .build();
+
+        POJORequestAddUser bodyRequest = POJORequestAddUser.builder()
+                .email("fakemail@gmail.com")
+                .username("thomasadmin")
+                .password("mycoolpassword")
+                .name(name)
+                .address(address)
+                .phone("791237192")
+                .build();
+
+        given().body(bodyRequest)
+                .contentType(ContentType.JSON)
+                .post("https://fakestoreapi.in/api/users")
+                .then().log().all()
+                .statusCode(200)
+                .body("user.id", notNullValue());
+    }
+
 }
