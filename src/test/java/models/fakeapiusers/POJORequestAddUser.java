@@ -12,6 +12,9 @@ import lombok.NoArgsConstructor;
 @Builder
 public class POJORequestAddUser {
 
+	@JsonProperty("id")
+	private int id;
+
 	@JsonProperty("password")
 	private String password;
 

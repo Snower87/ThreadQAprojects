@@ -12,7 +12,9 @@ import org.junit.jupiter.api.Test;
 import lombok.*;
 
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static io.restassured.RestAssured.given;
@@ -174,6 +176,67 @@ public class SimpleApiTests {
                 .then().log().all()
                 .statusCode(200)
                 .body("user.id", notNullValue());
+    }
+
+    private POJORequestAddUser getTestUser() {
+        Name name = new Name("Thomas", "Anderson");
+        Geolocation geolocation = new Geolocation(70.123, 100.1);
+
+        Address address = Address.builder()
+                .city("Москва")
+                .street("Noviy Arbat 12")
+                .number("14")
+                .zipcode("54231-4231")
+                .geolocation(geolocation)
+                .build();
+
+        return POJORequestAddUser.builder()
+                .id(5)
+                .email("fakemail@gmail.com")
+                .username("thomasadmin")
+                .password("mycoolpassword")
+                .name(name)
+                .address(address)
+                .phone("791237192")
+                .build();
+    }
+
+    @Test
+    public void updateUserTest() {
+        POJORequestAddUser user = getTestUser();
+        String oldPassword = user.getPassword();
+
+        user.setPassword("newpass12333");
+        given().contentType(ContentType.JSON)
+                .body(user)
+                .put("https://fakestoreapi.in/api/users/" + user.getId())
+                .then()
+                .log().all().statusCode(200)
+                .body("user.password", not(equalTo(oldPassword)));
+    }
+
+    @Test
+    public void deleteUserTest() {
+        given().delete("https://fakestoreapi.in/api/users/7")
+                .then()
+                .log().all()
+                .statusCode(200);
+
+    }
+
+    //405 Method Not Allowed
+    @Test
+    public void authUserTest() {
+        Map<String, String> userAuth = new HashMap<>();
+        userAuth.put("username", "michaelsimpson");
+        userAuth.put("password", "@K(5UejhL&");
+
+        given().contentType(ContentType.JSON)
+                .body(userAuth)
+                .post("https://fakestoreapi.in/auth/login")
+                .then().log().all();
+                //получаем токен из ответа + проверяем, что он не нулевой
+                //.body("token", notNullValue());
     }
 
 }
