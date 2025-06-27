@@ -32,4 +32,7 @@ public class POJORequestAddUser {
 
 	@JsonProperty("username")
 	private String username;
+
+	@JsonProperty("__v")
+	private int __v;
 }
