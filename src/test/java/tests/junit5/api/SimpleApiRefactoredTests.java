@@ -1,11 +1,13 @@
 package tests.junit5.api;
 
+import io.qameta.allure.restassured.AllureRestAssured;
 import io.restassured.RestAssured;
 import io.restassured.common.mapper.TypeRef;
 import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
+import listener.CustomTpl;
 import models.fakeapiusers.Address;
 import models.fakeapiusers.AuthData;
 import models.fakeapiusers.Geolocation;
@@ -15,6 +17,8 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.Comparator;
 import java.util.HashMap;
@@ -30,7 +34,8 @@ public class SimpleApiRefactoredTests {
     @BeforeAll
     public static void setUp() {
         RestAssured.baseURI = "https://fakestoreapi.com";
-        RestAssured.filters(new RequestLoggingFilter(), new ResponseLoggingFilter());
+        RestAssured.filters(new RequestLoggingFilter(), new ResponseLoggingFilter(),
+                CustomTpl.customLogFilter().withCustomTemplates());
     }
 
     @Test
@@ -65,10 +70,10 @@ public class SimpleApiRefactoredTests {
         Assertions.assertTrue(response.getAddress().getZipcode().matches("\\d{5}-\\d{4}"));
     }
 
-    @Test
-    public void getAllUsersWithLimitTest() {
+    @ParameterizedTest
+    @ValueSource(ints = {0, 1, 10, 20})
+    public void getAllUsersWithLimitTest(int limitSize) {
         //1. высылаем запрос с queryParam: api/users?limit=2
-        int limitSize = 2;
         List<POJORequestAddUser> users = given()
                 .queryParam("limit", limitSize)
                 .get("/users")
@@ -77,7 +82,22 @@ public class SimpleApiRefactoredTests {
                 .extract()
                 .jsonPath().getList("", POJORequestAddUser.class);
 
-        Assertions.assertEquals(2, users.size());
+        Assertions.assertEquals(limitSize, users.size());
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {0, 40})
+    public void getAllUsersWithLimitErrorParams(int limitSize) {
+        //1. высылаем запрос с queryParam: api/users?limit= 0, 40
+        List<POJORequestAddUser> users = given()
+                .queryParam("limit", limitSize)
+                .get("/users")
+                .then()
+                .statusCode(200)
+                .extract()
+                .jsonPath().getList("", POJORequestAddUser.class);
+
+        Assertions.assertNotEquals(limitSize, users.size());
     }
 
     @Test

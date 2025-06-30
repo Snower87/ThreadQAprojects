@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id("io.freefair.lombok") version "8.14"
+    id "io.qameta.allure" version "2.11.2"
 }
 
 group = 'org.example'
@@ -19,6 +20,7 @@ dependencies {
     testImplementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
     testImplementation 'org.aeonbits.owner:owner:1.0.4'
     testImplementation("io.rest-assured:rest-assured:4.4.0")
+    testImplementation 'io.qameta.allure:allure-rest-assured:2.29.0'
 }
 
 test {
