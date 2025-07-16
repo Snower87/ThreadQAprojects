@@ -1,5 +1,8 @@
 package tests.swagertests;
 
+import assertions.AssertableResponse;
+import assertions.Conditions;
+import assertions.GenericAssertableResponse;
 import io.restassured.RestAssured;
 import io.restassured.common.mapper.TypeRef;
 import io.restassured.filter.log.RequestLoggingFilter;
@@ -18,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import static assertions.Conditions.hasMessage;
+import static assertions.Conditions.hasStatusCode;
 import static io.restassured.RestAssured.given;
 
 public class UserTests {
@@ -93,6 +98,23 @@ public class UserTests {
                 .statusCode(400)
                 .extract()
                 .jsonPath().getObject("info", Info.class);
+
+        //обертка над запросом
+        new AssertableResponse(given().contentType(ContentType.JSON)
+                .body(user)
+                .post("/api/signup")
+                .then()).should(hasMessage("Missing login or password"))
+                .should(hasStatusCode(400))
+                .as("info", Info.class);
+
+        //обертка над запросом с указанием класса (в какой тип данных мы хотим это извлечь)
+        new GenericAssertableResponse<Info>(given().contentType(ContentType.JSON)
+                .body(user)
+                .post("/api/signup")
+                .then(), new TypeRef<Info>() {})
+                .should(hasMessage("Missing login or password"))
+                .should(hasStatusCode(400));
+                //.asObject().getMessage();
 
         Assertions.assertEquals("Missing login or password", info.getMessage());
     }
