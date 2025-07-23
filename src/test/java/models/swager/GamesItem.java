@@ -1,6 +1,9 @@
 package models.swager;
 
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,19 +14,21 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class GamesItem{
 
 	@JsonProperty("gameId")
-	private int gameId;
+	private Integer gameId;
 
 	@JsonProperty("requirements")
 	private Requirements requirements;
 
 	@JsonProperty("requiredAge")
-	private boolean requiredAge;
+	private Boolean requiredAge;
 
 	@JsonProperty("rating")
-	private int rating;
+	private Integer rating;
 
 	@JsonProperty("description")
 	private String description;
@@ -35,10 +40,10 @@ public class GamesItem{
 	private List<String> tags;
 
 	@JsonProperty("isFree")
-	private boolean isFree;
+	private Boolean isFree;
 
 	@JsonProperty("price")
-	private int price;
+	private Integer price;
 
 	@JsonProperty("dlcs")
 	private List<DlcsItem> dlcs;

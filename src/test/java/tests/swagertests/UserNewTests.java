@@ -3,8 +3,11 @@ package tests.swagertests;
 import io.restassured.RestAssured;
 import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
+import io.restassured.response.Response;
 import listener.CustomTpl;
 import models.swager.FullUser;
+import models.swager.Info;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -15,9 +18,9 @@ import java.util.Random;
 
 import static assertions.Conditions.hasMessage;
 import static assertions.Conditions.hasStatusCode;
+import static utils.RandomTestData.*;
 
 public class UserNewTests {
-    private static Random random;
 
     private static UserService userService;
 
@@ -26,23 +29,7 @@ public class UserNewTests {
         RestAssured.baseURI = "http://85.192.34.140:8080/";
         RestAssured.filters(new RequestLoggingFilter(), new ResponseLoggingFilter(),
                 CustomTpl.customLogFilter().withCustomTemplates());
-        random = new Random();
         userService = new UserService();
-    }
-
-    private FullUser getRandomUser() {
-        int randomNumber = Math.abs(random.nextInt());
-        return FullUser.builder()
-                .login("threadSergQAUser" + randomNumber)
-                .pass("myCoolPass")
-                .build();
-    }
-
-    private FullUser getAdminUser() {
-        return FullUser.builder()
-                .login("admin")
-                .pass("admin")
-                .build();
     }
 
     //Создание пользователя
@@ -52,6 +39,23 @@ public class UserNewTests {
         userService.register(user)
                 .should(hasStatusCode(201))
                 .should(hasMessage("User created"));
+    }
+
+    @Test
+    public void positiveRegisterWithGamesTest() {
+        FullUser user = getRandomUserWithGames();
+        Response response = userService.register(user)
+                .should(hasStatusCode(201))
+                .should(hasMessage("User created"))
+                .asResponse();
+        Info info = response.jsonPath().getObject("info", Info.class);
+
+        SoftAssertions softAssertions = new SoftAssertions();
+        softAssertions.assertThat(response.statusCode()).as("Статус код не был 200")
+                .isEqualTo(201);
+        softAssertions.assertThat(info.getMessage()).as("Сообщение об ошибке было не верное")
+                .isEqualTo("User created"); //было "фейк мессядж" и тест падал/выводил сообщение
+        //softAssertions.assertAll(); //собирает все ошибки
     }
 
     //Пользователь уже существует
