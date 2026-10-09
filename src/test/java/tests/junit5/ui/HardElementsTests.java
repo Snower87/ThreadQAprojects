@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 
 import java.time.Duration;
@@ -48,4 +49,14 @@ public class HardElementsTests {
         Assertions.assertEquals(expectedText, actualText);
         Assertions.assertEquals(expectedResult, result);
     }
+
+    @Test
+    public void iframeTest() {
+        driver.get("https://mail.ru/");
+        driver.findElement(By.xpath("//a[@class='resplash-btn resplash-btn_primary efc-fdfb__1ebh38x']")).click();
+        WebElement iframeAuth = driver.findElement(By.xpath("//iframe[@class='ag-popup__frame__layout__iframe']"));
+        driver.switchTo().frame(iframeAuth);
+        driver.findElement(By.xpath("//input[@id='email']")).sendKeys("threadqa@mail.ru");
+    }
+
 }
