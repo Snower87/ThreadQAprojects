@@ -20,6 +20,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.stream.Collectors;
+
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -119,9 +121,9 @@ public class SimpleApiRefactoredTests {
                 .jsonPath().getList("", POJORequestAddUser.class);
 
         List<Integer> sortedResponseIds = usersSorted.stream().map(x -> x.getId()).collect(Collectors.toList());
-        List<Integer> notSortedIds = usersNotSorted.stream().map(POJORequestAddUser::getId).toList();
+        List<Integer> notSortedIds = usersNotSorted.stream().map(POJORequestAddUser::getId).collect(Collectors.toList());
 
-        List<Integer> sortedByCode = usersNotSorted.stream().map(x -> x.getId()).sorted(Comparator.reverseOrder()).toList();
+        List<Integer> sortedByCode = usersNotSorted.stream().map(x -> x.getId()).sorted(Comparator.reverseOrder()).collect(Collectors.toList());
 
         //Actual   :[20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
         Assertions.assertNotEquals(usersSorted, usersNotSorted);

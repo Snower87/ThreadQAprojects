@@ -74,7 +74,6 @@ public class SeleniumTests {
         WebElement elementsTextBox = driver.findElement(By.xpath("//span[text()='Test Box']"));
         elementsTextBox.click();
 
-        //3. Ищем все элементы на странице
         WebElement fullName = driver.findElement(By.id("userName"));
         WebElement email = driver.findElement(By.id("userEmail"));
         WebElement currentAddress = driver.findElement(By.id("currentAddress"));
